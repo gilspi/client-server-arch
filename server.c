@@ -42,6 +42,7 @@ void func(int client) {
 
     // Отправляем 100 раз данные обратно клиенту
     for (int i = 0; i < 100; ++i) {
+        generateRandomData(&packet);
         ssize_t bytes_written = write(client, &packet, sizeof(packet));
         if (bytes_written == -1) {
             perror("Ошибка при отправке данных клиенту");
