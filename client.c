@@ -13,12 +13,13 @@
 void func(int client) {
     struct DataPacket response;
     struct DataPacket packet;
-    // наш пакет данных 
-    packet.id = 1;
-    packet.value = 1.25;
-    strcpy(packet.msg, "Hello, Server!");
+    // заполняем наш пакет
+    generateRandomData(&packet);
     //
-    write(client, &packet, sizeof(packet));  // отправили наш пакет на сервер
+    if (write(client, &packet, sizeof(packet)) == -1){  // отправили наш пакет на сервер
+        perror("Ошибка отправки данных на сервер");
+        exit(EXIT_FAILURE);
+    };
     /*
     Сервер в ответ должен прислать ответ, который мы прочитаем и выведем его на экран. 
     Ответом будет 100 сообщений от сервера.
@@ -26,13 +27,30 @@ void func(int client) {
     for (int i = 1; i <= 100; ++i){
         bzero(&response, sizeof(response));  // подготовили ячейки памяти к приему данных
 
-        read(client, &response, sizeof(response));
-        printf("Received data %d from server: ID=%d\tVALUE=%.3f\tMESSAGE=%s\n", 
-                i, response.id, response.value, response.msg);
+        ssize_t bytes_read = read(client, &response, sizeof(response));
+        if (bytes_read == -1){
+            perror("Ошибка при чтении данных с сервера");
+            exit(EXIT_FAILURE);
+        }
 
+        printf("===== Received data %d from server =====\n", i);
+        printf("Header ID: %u\n", response.header.id);
+        printf("Header Version: %.2f\n", response.header.version);
+        printf("Header Description: %s\n", response.header.description);
+
+        printf("First 5 numbers: ");
+        for (int j = 0; j < 5; j++) {
+            printf("%d ", response.data.numbers[j]);
+        }
+        printf("\n");
+
+        printf("Strings in Data:\n");
+        for (int j = 0; j < 5; j++) {
+            printf("String %d: %s\n", j + 1, response.data.strings[j]);
+        }
+        printf("\n========================================\n");
     }
 }
-
 
 
 int main(){
