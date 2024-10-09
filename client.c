@@ -3,11 +3,14 @@
 #include <sys/io.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <string.h>
+#include <unistd.h>
 #include "data_packet.h"
+
 #define PORT 8080
 
 
-void func(int client){
+void func(int client) {
     struct DataPacket response;
     struct DataPacket packet;
     // наш пакет данных 
@@ -46,7 +49,7 @@ int main(){
     bzero(&servaddr, sizeof(servaddr));
 
     servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");  // указываем адрес
-    servaddr.sin_port = htnos(PORT);  // указываем порт в сетевом порядке байтов
+    servaddr.sin_port = htons(PORT);  // указываем порт в сетевом порядке байтов
     servaddr.sin_family = AF_INET; // IPv4
 
     if (connect(client, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
